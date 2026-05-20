@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Register</title>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<div class="navbar">
+
+  <h2>📝 Register</h2>
+
+  <div>
+
+    <a href="index.html">
+      Home
+    </a>
+
+    <a href="login.html">
+      Login
+    </a>
+
+  </div>
+
+</div>
+
+
+<!-- ================= REGISTER BOX ================= -->
+
+<div class="hero">
+
+  <div
+    class="card"
+    style="
+      width:350px;
+      padding:30px;
+    "
+  >
+
+    <h1>Create Account 🚀</h1>
+
+    <p>
+      Register to continue shopping
+    </p>
+
+
+    <!-- NAME -->
+
+    <input
+      id="name"
+      type="text"
+      placeholder="Enter Name"
+    >
+
+    <br><br>
+
+
+    <!-- EMAIL -->
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Enter Email"
+    >
+
+    <br><br>
+
+
+    <!-- PASSWORD -->
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Enter Password"
+    >
+
+    <br><br>
+
+
+    <!-- BUTTON -->
+
+    <button
+      class="btn"
+      onclick="register()"
+      id="registerBtn"
+    >
+
+      Register ✨
+
+    </button>
+
+    <br><br>
+
+
+    <!-- MESSAGE -->
+
+    <p id="msg"></p>
+
+
+    <!-- LOGIN LINK -->
+
+    <p>
+
+      Already have an account?
+
+      <a
+        href="login.html"
+        style="color:#00c6ff;"
+      >
+        Login
+      </a>
+
+    </p>
+
+  </div>
+
+</div>
+
+
+<!-- ================= SCRIPT ================= -->
+
+<script>
+
+async function register() {
+
+  const name =
+    document.getElementById("name")
+    .value
+    .trim();
+
+  const email =
+    document.getElementById("email")
+    .value
+    .trim();
+
+  const password =
+    document.getElementById("password")
+    .value
+    .trim();
+
+  const msg =
+    document.getElementById("msg");
+
+  const btn =
+    document.getElementById("registerBtn");
+
+
+  // ================= VALIDATION =================
+
+  if (
+    !name ||
+    !email ||
+    !password
+  ) {
+
+    msg.innerText =
+      "❌ Please fill all fields";
+
+    msg.style.color =
+      "red";
+
+    return;
+  }
+
+
+  // ================= LOADING =================
+
+  btn.disabled = true;
+
+  btn.innerText =
+    "Registering... ⏳";
+
+
+  try {
+
+    const res =
+      await fetch(
+
+        "http://localhost:5000/api/auth/register",
+
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+
+            name,
+            email,
+            password
+          })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+    console.log(data);
+
+
+    // ================= SUCCESS =================
+
+    if (res.ok) {
+
+      msg.innerText =
+        "✅ Registered Successfully";
+
+      msg.style.color =
+        "lightgreen";
+
+
+      setTimeout(() => {
+
+        window.location.href =
+          "login.html";
+
+      }, 1000);
+
+    }
+
+
+    // ================= ERROR =================
+
+    else {
+
+      msg.innerText =
+        data.error ||
+        "❌ Registration failed";
+
+      msg.style.color =
+        "red";
+    }
+
+  }
+
+  catch (err) {
+
+    console.log(err);
+
+    msg.innerText =
+      "❌ Server error";
+
+    msg.style.color =
+      "red";
+  }
+
+
+  // ================= RESET BUTTON =================
+
+  btn.disabled = false;
+
+  btn.innerText =
+    "Register ✨";
+}
+
+</script>
+
+</body>
+</html>

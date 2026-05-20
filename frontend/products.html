@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Products</title>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- ================= LOGIN CHECK ================= -->
+
+<script>
+
+const token =
+  localStorage.getItem("token");
+
+if (!token) {
+
+  alert("Please login first 🔒");
+
+  window.location.href =
+    "login.html";
+}
+
+</script>
+
+
+<!-- ================= NAVBAR ================= -->
+
+<div class="navbar">
+
+  <h2>🛍️ My Shop</h2>
+
+  <div>
+
+    <a href="index.html">
+      Home
+    </a>
+
+    <a href="cart.html">
+      Cart 🛒
+    </a>
+
+    <a href="profile.html">
+      👤 Profile
+    </a>
+
+
+    <!-- ================= ADMIN ONLY ================= -->
+
+    <a
+      href="add-product.html"
+      id="addProductBtn"
+      style="display:none;"
+    >
+      ➕ Add Product
+    </a>
+
+
+    <a href="#"
+       onclick="logout()">
+      Logout
+    </a>
+
+  </div>
+
+</div>
+
+
+<!-- ================= HERO ================= -->
+
+<div class="hero" style="min-height:40vh;">
+
+  <h1>🔥 Explore Products</h1>
+
+  <p>Shop by categories</p>
+
+</div>
+
+
+<!-- ================= SEARCH ================= -->
+
+<div style="text-align:center; margin-bottom:20px;">
+
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="🔍 Search products..."
+    onkeyup="searchProducts()"
+  >
+
+</div>
+
+
+<!-- ================= CATEGORY BUTTONS ================= -->
+
+<div
+  style="
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-bottom:30px;
+  "
+>
+
+  <button
+    class="btn"
+    onclick="filterProducts('all')"
+  >
+    All
+  </button>
+
+  <button
+    class="btn"
+    onclick="filterProducts('men')"
+  >
+    👔 Men
+  </button>
+
+  <button
+    class="btn"
+    onclick="filterProducts('women')"
+  >
+    👗 Women
+  </button>
+
+  <button
+    class="btn"
+    onclick="filterProducts('kids')"
+  >
+    🧸 Kids
+  </button>
+
+  <button
+    class="btn"
+    onclick="filterProducts('jewellery')"
+  >
+    💍 Jewellery
+  </button>
+
+</div>
+
+
+<!-- ================= PRODUCTS ================= -->
+
+<div id="products" class="container"></div>
+
+
+<!-- ================= SCRIPT ================= -->
+
+<script>
+
+
+// ================= GET USER =================
+
+const user =
+  JSON.parse(
+    localStorage.getItem("user")
+  );
+
+
+// ================= SHOW ADMIN BUTTON =================
+
+if (
+
+  user &&
+
+  user.role === "admin"
+
+) {
+
+  document.getElementById(
+    "addProductBtn"
+  ).style.display = "inline-block";
+}
+
+
+// ================= LOAD PRODUCTS =================
+
+async function loadProducts() {
+
+  try {
+
+    const res =
+      await fetch(
+        "http://localhost:5000/api/products"
+      );
+
+    const products =
+      await res.json();
+
+    const container =
+      document.getElementById("products");
+
+    container.innerHTML = "";
+
+
+    products.forEach(product => {
+
+      container.innerHTML += `
+
+        <div
+          class="card"
+          data-category="${product.category.toLowerCase().trim()}"
+        >
+
+          <img
+            src="${product.image}"
+            alt="${product.name}"
+            style="
+              width:100%;
+              height:220px;
+              object-fit:cover;
+              border-radius:10px;
+            "
+          >
+
+          <h3>${product.name}</h3>
+
+          <p>₹${product.price}</p>
+
+          <p>${product.description}</p>
+
+          <p>
+
+            <b>Category:</b>
+
+            ${product.category}
+
+          </p>
+
+
+          <!-- ================= ADD TO CART ================= -->
+
+          <button
+            class="btn"
+            onclick='addToCart(${JSON.stringify(product)})'
+          >
+            Add To Cart 🛒
+          </button>
+
+
+          <!-- ================= DELETE BUTTON (ADMIN ONLY) ================= -->
+
+          ${
+
+            user?.role === "admin"
+
+            ?
+
+            `
+
+            <button
+              class="btn"
+              style="
+                background:red;
+                margin-top:10px;
+              "
+              onclick="deleteProduct('${product._id}')"
+            >
+              Delete 🗑️
+            </button>
+
+            `
+
+            :
+
+            ""
+
+          }
+
+        </div>
+
+      `;
+    });
+
+  }
+
+  catch (err) {
+
+    console.log(err);
+
+    document.getElementById("products")
+      .innerHTML =
+      "<h2>❌ Failed to load products</h2>";
+  }
+}
+
+
+// ================= SEARCH =================
+
+function searchProducts() {
+
+  const input =
+    document.getElementById("searchInput")
+    .value
+    .toLowerCase()
+    .trim();
+
+  const cards =
+    document.querySelectorAll(".card");
+
+  cards.forEach(card => {
+
+    const text =
+      card.innerText.toLowerCase();
+
+    if (text.includes(input)) {
+
+      card.style.display = "block";
+
+    }
+
+    else {
+
+      card.style.display = "none";
+    }
+
+  });
+}
+
+
+// ================= FILTER PRODUCTS =================
+
+function filterProducts(category) {
+
+  category =
+    category.toLowerCase().trim();
+
+  const cards =
+    document.querySelectorAll(".card");
+
+  cards.forEach(card => {
+
+    const productCategory =
+      card.getAttribute("data-category")
+      .toLowerCase()
+      .trim();
+
+    if (
+
+      category === "all" ||
+
+      productCategory === category
+
+    ) {
+
+      card.style.display = "block";
+    }
+
+    else {
+
+      card.style.display = "none";
+    }
+
+  });
+}
+
+
+// ================= ADD TO CART =================
+
+function addToCart(product) {
+
+  let cart =
+    JSON.parse(
+      localStorage.getItem("cart")
+    ) || [];
+
+  cart.push(product);
+
+  localStorage.setItem(
+    "cart",
+    JSON.stringify(cart)
+  );
+
+  alert("✅ Product added to cart");
+}
+
+
+// ================= DELETE PRODUCT =================
+
+async function deleteProduct(id) {
+
+  const confirmDelete =
+    confirm("Delete this product?");
+
+  if (!confirmDelete) return;
+
+  try {
+
+    const token =
+      localStorage.getItem("token");
+
+    const res =
+      await fetch(
+
+        `http://localhost:5000/api/products/${id}`,
+
+        {
+
+          method: "DELETE",
+
+          headers: {
+
+            Authorization:
+              "Bearer " + token
+          }
+        }
+      );
+
+    const data =
+      await res.json();
+
+    alert(data.message);
+
+    loadProducts();
+
+  }
+
+  catch (err) {
+
+    console.log(err);
+
+    alert("❌ Delete failed");
+  }
+}
+
+
+// ================= LOGOUT =================
+
+function logout() {
+
+  localStorage.removeItem("token");
+
+  localStorage.removeItem("user");
+
+  localStorage.removeItem("cart");
+
+  window.location.href =
+    "login.html";
+}
+
+
+// ================= INITIAL LOAD =================
+
+loadProducts();
+
+</script>
+
+</body>
+</html>

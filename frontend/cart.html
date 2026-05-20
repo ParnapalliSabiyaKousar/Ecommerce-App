@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cart</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <h2>🛒 Cart</h2>
+  <div>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+  </div>
+</div>
+
+
+<!-- CART CONTAINER -->
+<div class="container" id="cart"></div>
+
+<!-- TOTAL -->
+<h2 style="text-align:center; color:white;" id="total">Total: ₹0</h2>
+
+<!-- ACTION BUTTONS -->
+<div style="text-align:center; margin-top:20px;">
+  <button class="btn" onclick="checkout()">Checkout 🎉</button>
+  <button class="btn" onclick="clearCart()">Clear Cart 🧹</button>
+</div>
+
+
+<script>
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+
+// ======================
+// RENDER CART
+// ======================
+function renderCart() {
+
+  const container = document.getElementById("cart");
+  const totalBox = document.getElementById("total");
+
+  container.innerHTML = "";
+
+  if (cart.length === 0) {
+    container.innerHTML = "<h2 style='color:white;text-align:center;'>Cart is empty 🛒</h2>";
+    totalBox.innerText = "Total: ₹0";
+    return;
+  }
+
+  let total = 0;
+
+  cart.forEach((item, i) => {
+
+    total += Number(item.price);
+
+    container.innerHTML += `
+      <div class="card">
+        <h3>${item.name}</h3>
+        <p>₹${item.price}</p>
+
+        <button class="btn" onclick="removeItem(${i})">
+          Remove ❌
+        </button>
+      </div>
+    `;
+  });
+
+  totalBox.innerText = "Total: ₹" + total;
+}
+
+
+// ======================
+// REMOVE ITEM
+// ======================
+function removeItem(i) {
+
+  cart.splice(i, 1);
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  renderCart();
+}
+
+
+// ======================
+// CLEAR CART
+// ======================
+function clearCart() {
+
+  cart = [];
+
+  localStorage.removeItem("cart");
+
+  renderCart();
+
+  alert("Cart cleared 🧹");
+}
+
+
+// ======================
+// CHECKOUT
+// ======================
+function checkout() {
+
+  if (cart.length === 0) {
+    alert("Cart is empty ❌");
+    return;
+  }
+
+  alert("Order placed successfully 🎉");
+
+  cart = [];
+
+  localStorage.removeItem("cart");
+
+  renderCart();
+}
+
+
+// ======================
+// INIT
+// ======================
+renderCart();
+
+</script>
+
+</body>
+</html>

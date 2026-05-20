@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Product</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+<!-- ================= LOGIN CHECK ================= -->
+<script>
+const token = localStorage.getItem("token");
+
+if (!token) {
+  alert("Please login first 🔒");
+  window.location.href = "login.html";
+}
+</script>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+  <h2>➕ Add Product</h2>
+
+  <div>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart 🛒</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </div>
+</div>
+
+<!-- ================= FORM ================= -->
+<div class="hero">
+
+  <h2>✨ Add New Product</h2>
+
+  <input id="name" placeholder="Product Name" />
+  <br><br>
+
+  <input id="price" placeholder="Price" />
+  <br><br>
+
+  <input id="description" placeholder="Description" />
+  <br><br>
+
+  <!-- IMAGE UPLOAD -->
+  <input type="file" id="image" accept="image/*" />
+  <br><br>
+
+  <select id="category">
+    <option value="men">Men</option>
+    <option value="women">Women</option>
+    <option value="kids">Kids</option>
+    <option value="jewellery">Jewellery</option>
+  </select>
+
+  <br><br>
+
+  <button class="btn" onclick="addProduct()" id="btn">
+    Add Product
+  </button>
+
+  <p id="msg"></p>
+
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+
+/* ================= LOGOUT ================= */
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "login.html";
+}
+
+/* ================= ADD PRODUCT ================= */
+async function addProduct() {
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const name = document.getElementById("name").value.trim();
+  const price = document.getElementById("price").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const imageInput = document.getElementById("image");
+  const image = imageInput.files[0];
+  const category = document.getElementById("category").value;
+
+  const msg = document.getElementById("msg");
+  const btn = document.getElementById("btn");
+
+  msg.innerText = "";
+
+  /* ================= VALIDATION ================= */
+  if (!name || !price || !description || !image) {
+    msg.innerText = "❌ Please fill all fields including image";
+    msg.style.color = "red";
+    return;
+  }
+
+  if (isNaN(price) || Number(price) <= 0) {
+    msg.innerText = "❌ Enter a valid price";
+    msg.style.color = "red";
+    return;
+  }
+
+  /* ================= LOADING ================= */
+  btn.disabled = true;
+  btn.innerText = "Uploading... ⏳";
+
+  try {
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("price", price);
+    formData.append("description", description);
+    formData.append("category", category);
+    formData.append("image", image);
+
+    const res = await fetch("http://localhost:5000/api/products", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token
+      },
+      body: formData
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+
+    if (res.ok) {
+
+      msg.innerText = "✅ Product Uploaded Successfully!";
+      msg.style.color = "lightgreen";
+
+      // CLEAR FORM
+      document.getElementById("name").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("description").value = "";
+      imageInput.value = ""; // ✅ FIXED
+
+      setTimeout(() => {
+        window.location.href = "products.html";
+      }, 1200);
+
+    } else {
+      msg.innerText = data.error || "❌ Upload failed";
+      msg.style.color = "red";
+    }
+
+  } catch (err) {
+    console.log(err);
+    msg.innerText = "❌ Server not connected";
+    msg.style.color = "red";
+  }
+
+  /* ================= RESET BUTTON ================= */
+  btn.disabled = false;
+  btn.innerText = "Add Product";
+}
+
+</script>
+
+</body>
+</html>

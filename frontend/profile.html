@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>Profile</title>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+  <h2>👤 My Profile</h2>
+
+  <div>
+
+    <a href="products.html">Products</a>
+
+    <a href="cart.html">Cart</a>
+
+  </div>
+
+</div>
+
+
+<div class="profile-container">
+
+  <div class="profile-card">
+
+    <img
+      src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+      class="profile-img"
+    >
+
+    <h2 id="profileName">
+      User
+    </h2>
+
+    <p id="profileEmail">
+      user@email.com
+    </p>
+
+    <input
+      type="text"
+      id="editName"
+      placeholder="Edit Name"
+    >
+
+    <input
+      type="email"
+      id="editEmail"
+      placeholder="Edit Email"
+    >
+
+    <button class="btn" onclick="saveProfile()">
+      Save Profile
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const user =
+  JSON.parse(localStorage.getItem("user"));
+
+if (user) {
+
+  document.getElementById(
+    "profileName"
+  ).innerText =
+    user.name;
+
+  document.getElementById(
+    "profileEmail"
+  ).innerText =
+    user.email;
+
+  document.getElementById(
+    "editName"
+  ).value =
+    user.name;
+
+  document.getElementById(
+    "editEmail"
+  ).value =
+    user.email;
+}
+
+
+// ================= SAVE PROFILE =================
+function saveProfile() {
+
+  const updatedUser = {
+
+    name:
+      document.getElementById("editName").value,
+
+    email:
+      document.getElementById("editEmail").value
+  };
+
+  localStorage.setItem(
+    "user",
+    JSON.stringify(updatedUser)
+  );
+
+  alert("Profile updated successfully ✅");
+
+  location.reload();
+}
+
+</script>
+
+</body>
+</html>

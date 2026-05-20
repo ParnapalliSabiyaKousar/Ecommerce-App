@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Login</title>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<div class="navbar">
+
+  <h2>🔐 Login</h2>
+
+  <div>
+
+    <a href="index.html">
+      Home
+    </a>
+
+    <a href="register.html">
+      Register
+    </a>
+
+  </div>
+
+</div>
+
+
+<!-- ================= LOGIN SECTION ================= -->
+
+<div class="hero">
+
+  <div
+    class="card"
+    style="
+      width:350px;
+      padding:30px;
+    "
+  >
+
+    <h1>
+      Welcome Back 👋
+    </h1>
+
+    <p>
+      Login to continue shopping
+    </p>
+
+
+    <!-- ================= EMAIL ================= -->
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Enter Email"
+    >
+
+    <br><br>
+
+
+    <!-- ================= PASSWORD ================= -->
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Enter Password"
+    >
+
+    <br><br>
+
+
+    <!-- ================= LOGIN BUTTON ================= -->
+
+    <button
+      class="btn"
+      onclick="login()"
+      id="loginBtn"
+    >
+
+      Login 🚀
+
+    </button>
+
+    <br><br>
+
+
+    <!-- ================= MESSAGE ================= -->
+
+    <p id="msg"></p>
+
+
+    <!-- ================= REGISTER LINK ================= -->
+
+    <p>
+
+      Don't have an account?
+
+      <a
+        href="register.html"
+        style="color:#00c6ff;"
+      >
+        Register
+      </a>
+
+    </p>
+
+  </div>
+
+</div>
+
+
+<!-- ================= SCRIPT ================= -->
+
+<script>
+
+
+// ================= LOGIN FUNCTION =================
+
+async function login() {
+
+  const email =
+    document.getElementById("email")
+    .value
+    .trim();
+
+  const password =
+    document.getElementById("password")
+    .value
+    .trim();
+
+  const msg =
+    document.getElementById("msg");
+
+  const btn =
+    document.getElementById("loginBtn");
+
+
+  // CLEAR MESSAGE
+  msg.innerText = "";
+
+
+  // ================= VALIDATION =================
+
+  if (!email || !password) {
+
+    msg.style.color = "red";
+
+    msg.innerText =
+      "❌ Please enter email and password";
+
+    return;
+  }
+
+
+  // ================= LOADING =================
+
+  btn.disabled = true;
+
+  btn.innerText =
+    "Logging in... ⏳";
+
+
+  try {
+
+    const res =
+      await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+
+            email,
+            password
+          })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    // ================= SUCCESS =================
+
+    if (res.ok) {
+
+      // SAVE TOKEN
+      localStorage.setItem(
+        "token",
+        data.token
+      );
+
+
+      // SAVE USER
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      );
+
+
+      msg.style.color =
+        "lightgreen";
+
+      msg.innerText =
+        "✅ Login successful... Redirecting";
+
+
+      // ================= REDIRECT =================
+
+      setTimeout(() => {
+
+        window.location.href =
+          "products.html";
+
+      }, 1000);
+
+    }
+
+
+    // ================= LOGIN FAILED =================
+
+    else {
+
+      msg.style.color = "red";
+
+      msg.innerText =
+        data.message ||
+        data.error ||
+        "❌ Login failed";
+    }
+
+  }
+
+
+  // ================= SERVER ERROR =================
+
+  catch (err) {
+
+    console.log(err);
+
+    msg.style.color = "red";
+
+    msg.innerText =
+      "❌ Server not connected";
+  }
+
+
+  // ================= RESET BUTTON =================
+
+  btn.disabled = false;
+
+  btn.innerText =
+    "Login 🚀";
+}
+
+</script>
+
+</body>
+</html>
